@@ -1,0 +1,52 @@
+Camilo Meeting, 4_28_2020
+
+look at data descripitvely
+
+shared a folder on dropbox (Helen- displacement)
+
+book1 has the data
+
+data is a panel of years and municipalities
+
+municipality--> muni identifier
+dept_code --> state identifier
+population_1993 --> the initial population
+victims_UR --> is a flow, the number of murders that happened that year
+cum_victims_UR --> is a stock, cumalative number of murders up to that year (moving sum of column victims_UR)
+
+column E is like the independent variable
+
+column G onward measures population displacement (five different measurements of 
+displacement (AS, CODHES) since there is measurement error) --> in flow and stock as well
+
+want to try to understand this measurement error
+
+to do:
+0. check that the cumulative sums are correct
+1. take the last year for each muni and calc correlation between those 5 cumalative measures
+2. there will be 17 correlation matrices
+3. try to identifier which observations are outliers
+4. plot the pairwise scatterplots (1 against 2, 1 against 3) --> do a grid of scatterplots
+	*do this year by year, so 17 in total
+5. explore the lag between the violence (number of victims) and displacement measures
+	*identify where flow of violence is not zero (ie v_t>0) and then is zero for two years after
+	*then we see displacement only (repeat that for these 5 measures) in the third period 
+6. when we see violence (in the flow), how many years does it take before we see displacement increase? (is it the same period, after 1 year, after 2 years, etc)
+	*do this for each of the 5 measures
+	*show distribution (ie histogram)
+7. x-axis is cumulative violence, y-axis is cumalative displacement per capita (in the period right before new violence occurs)
+the following ordered pairs (each is a dot in the scatter plot), we only have a new data point when
+the cumulative violence increases
+0, 378
+6, 679
+15, 1131
+in the next muni the points are
+3,64
+6,374
+*create 1 figure for each municipality with five lines (one for each displacement measure)
+
+
+
+1K municaplities
+17 years of data
+

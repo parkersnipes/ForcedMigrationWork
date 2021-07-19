@@ -21,7 +21,7 @@ library(xlsx)
 
 
 cross_section_geo = select(cross_section,municipality,lat_mean,lon_mean,popn1993,ruggedness,slope,V_cum)
-muni_pol <- st_read("raw_data/col muni polygons/col_admbnda_adm2_mgn_20200416.shp",
+muni_pol <- st_read("Data/col muni polygons/col_admbnda_adm2_mgn_20200416.shp",
                     stringsAsFactors=FALSE)
 
 muni_pol <- subset(muni_pol,ADM2_PCODE != "CO88001")
@@ -93,10 +93,10 @@ FinalWithDeltamins <- merge(ll_map,merge_deltamins,by = "ADM2_PCODE")
 #FinalWithDeltamins$delta_min[FinalWithDeltamins$delta_min > 1000] <- NA
 
 filenome = paste(paste("Histogram of updated delta-min",sep=""),".png",sep="")
-qplot(as.numeric(deltas$delta_min), geom = "histogram",binwidth = 10,fill = I("darkblue"),main="Distribution of Cumulative, Terrain-weighted Distance from Violence Source",xlab="Distance from Source (km)")
+qplot(as.numeric(deltas$delta_min), geom = "histogram",binwidth = 10,fill = I("darkblue"),main="Cumulative, Terrain-weighted Distance from Violence Source",xlab="Distance from Source (km)")
 ggsave(filenome,width=11,height=8)
 
-filenome = paste(paste("output/Updated_distance_map_gradient",sep=""),".png",sep="")
+filenome = paste(paste("figures/Updated_distance_map_gradient",sep=""),".png",sep="")
 title = paste(paste("Updated Colombian municipalities by distance from closest violence source ",sep=""),sep="")
 ggplot() +
   #geom_sf(data = muni_map, fill='white', color = 'grey34',lwd=.05) +
@@ -110,23 +110,24 @@ ggplot() +
         axis.text.y=element_blank(),
         axis.ticks.y=element_blank())
 ggsave(filenome,width=11,height=8)
-
 counter = 0
   FinalWithDeltamins = FinalWithDeltamins %>%  mutate(in_target_distance = ifelse((delta_min<=720&delta_min>630),"Yes","No/NA"))
-  filenome = paste(paste("figures/distance_ring",sep=""),".png",sep="")
-  title = paste(paste("Colombian municipalities by distance from closest violence source ",sep=""),sep="")
+  filenome = paste(paste("figures/colorscaled_distance_ring",sep=""),".png",sep="")
+  title = paste(paste("Colorscaled Colombian municipalities by distance from closest violence source ",sep=""),sep="")
   ggplot() +
     #geom_sf(data = muni_map, fill='white', color = 'grey34',lwd=.05) +
-    geom_sf(data = FinalWithDeltamins, aes(fill=in_target_distance),color = 'grey34',lwd=.05) +
+    geom_sf(data = FinalWithDeltamins, aes(fill=delta_min),color = 'grey34',lwd=.05) +
     ggtitle(title) +
-    scale_fill_manual(values=c("white","royalblue1"),aesthetics = c("fill"),name= paste("Between 720-630 km from nearest source ", sep="")) +
+    #scale_fill_manual(values=c("white","royalblue1"),aesthetics = c("fill"),name= paste("Between 720-630 km from nearest source ", sep="")) +
+    #binned_scale(aesthetics = c("fill"),scale_name = "bin",palette = scale,breaks = c(0,90,180,270,360,450),labels = c("90km","180km","270km","360km","450km"))
+    scale_fill_stepsn(colors = c("red","gold","green","blue","blue","blue"),values = NULL,space = "Lab",na.value = "grey50",guide = "coloursteps",aesthetics = "fill",n.breaks = 6,breaks = c(1,90,180,270,360,450),labels = c("0km","90km","180km","270km","360km","450km"),limits=c(0, 1000))
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
           axis.title.y=element_blank(),
           axis.text.y=element_blank(),
           axis.ticks.y=element_blank())
-  #ggsave(filenome,width=11,height=8) 
+  ggsave(filenome,width=11,height=8) 
 
-
+  
 

@@ -1,0 +1,6 @@
+"dept_CODE","municipality","year","Population_1993","victims__UR","cum_victims_UR","cum_displaced_AS","displaced_CODHES","cum_displaced_CODHES","displaced_RUV","cum_displaced_RUV","displaced_CEDE","cum_displaced_CEDE","displaced_AS","cum_displaced_JYP","number_dept","province","province_code","n_disp_0lead","n_disp_1lead","n_disp_2lead","n_viol_0lead","n_viol_1lead","n_viol_2lead","instance"
+8,8141,2003,11113,3,3,13,0,23,0,30,4,34,0,18,"ATLÁNTICO","SUR",16,0,0,10,3,0,0,1
+17,17877,2010,15474,4,6,226,22,149,4,359,0,208,0,260,"CALDAS","BAJO OCCIDENTE",38,0,0,11,4,0,0,1
+54,54673,2000,3479,4,4,5,0,0,0,10,5,5,0,0,"NORTE DE SANTAND","ORIENTAL",102,0,0,19,4,0,0,1
+54,54874,1996,56517,2,2,0,0,0,2,2,0,0,0,0,"NORTE DE SANTAND","ORIENTAL",102,0,0,17,2,0,0,1
+85,85430,1996,9524,3,3,0,0,0,0,0,0,0,0,0,"CASANARE","CASANARE",43,0,0,48,3,0,0,1

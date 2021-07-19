@@ -10,7 +10,7 @@ library(sf)
 library(st)
 
 #import columbian municipality shapefiles
-muni_pol = st_read("raw_data/col muni polygons/col_admbnda_adm2_mgn_20200416.shp",
+muni_pol = st_read("Data/col muni polygons/col_admbnda_adm2_mgn_20200416.shp",
                    stringsAsFactors=FALSE)
 
 #make municipality code match codes from flows dataset
@@ -19,7 +19,7 @@ muni_pol = muni_pol %>%
   select(c("municipality"))
 
 #load flows dataset
-muni_flows = read.csv("output/COL_muni_flows.csv",stringsAsFactors=FALSE)
+muni_flows = read.csv("Data/COL_muni_flows.csv",stringsAsFactors=FALSE)
 
 #generate when first episode of violence occurred
 muni_flows = muni_flows %>% 

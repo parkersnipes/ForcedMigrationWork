@@ -1,0 +1,9 @@
+"dept_CODE","municipality","year","Population_1993","victims__UR","cum_victims_UR","cum_displaced_AS","displaced_CODHES","cum_displaced_CODHES","displaced_RUV","cum_displaced_RUV","displaced_AS","cum_displaced_CEDE","displaced_JYP","cum_displaced_JYP","number_dept","province","province_code","n_disp_0lead","n_disp_1lead","n_disp_2lead","n_viol_0lead","n_viol_1lead","n_viol_2lead","instance"
+5,5308,1998,31600,6,9,21,10,37,24,49,0,0,7,17,"ANTIOQUIA","VALLE DEL ABURRA",10,0,0,11,6,0,0,1
+25,25662,1997,10187,1,1,30,3,6,8,23,0,0,8,17,"CUNDINAMARCA","MAGDALENA CENTRO",69,0,0,8,1,0,0,1
+50,50223,1999,4347,1,1,65,54,64,65,116,0,7,35,54,"META","PIEDEMONTE",92,0,0,53,1,0,0,1
+54,54680,1999,2686,6,6,6,250,250,0,9,0,6,0,7,"NORTE DE SANTAND","CENTRO",99,0,0,17,6,0,0,1
+54,54874,1996,56517,2,2,0,0,0,2,2,0,0,0,0,"NORTE DE SANTAND","ORIENTAL",102,0,0,11,2,0,0,1
+68,68895,1998,11398,2,2,54,0,0,21,85,0,13,10,34,"SANTANDER","MARES",117,0,0,37,2,0,0,1
+73,73349,1998,30597,5,5,16,0,0,2,30,0,6,0,15,"TOLIMA","NORTE",127,0,0,5,5,0,0,1
+85,85430,1996,9524,3,3,0,0,0,0,0,0,0,0,0,"CASANARE","CASANARE",43,0,0,18,3,0,0,1
