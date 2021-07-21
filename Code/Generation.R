@@ -31,6 +31,13 @@ addCO <- function(muni){
   paste("CO",muni,sep = "")
 }
 
+
+AttributeTableFinal <- read.csv("Data/AttributeTableFinal.csv")
+
+AttributeTableFinal <- mutate(AttributeTableFinal,latnum = as.numeric(lat),
+                              lonnum = as.numeric(lon))
+
+
 cross_section_geo <- mutate(cross_section_geo,
                             ADM2_PCODE = purrr::map_chr(municipality,addCO))
 
@@ -120,7 +127,7 @@ counter = 0
     ggtitle(title) +
     #scale_fill_manual(values=c("white","royalblue1"),aesthetics = c("fill"),name= paste("Between 720-630 km from nearest source ", sep="")) +
     #binned_scale(aesthetics = c("fill"),scale_name = "bin",palette = scale,breaks = c(0,90,180,270,360,450),labels = c("90km","180km","270km","360km","450km"))
-    scale_fill_stepsn(colors = c("red","gold","green","blue","blue","blue"),values = NULL,space = "Lab",na.value = "grey50",guide = "coloursteps",aesthetics = "fill",n.breaks = 6,breaks = c(1,90,180,270,360,450),labels = c("0km","90km","180km","270km","360km","450km"),limits=c(0, 1000))
+    scale_fill_stepsn(colors = c("red","gold","darkgreen","blue","magenta","violet"),values = NULL,space = "Lab",na.value = "grey50",guide = "coloursteps",aesthetics = "fill",n.breaks = 7,breaks = c(1,90,180,270,360,450,540),labels = c("0km","90km","180km","270km","360km","450km","540km"),limits=c(0, 1000))
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
@@ -128,6 +135,24 @@ counter = 0
           axis.text.y=element_blank(),
           axis.ticks.y=element_blank())
   ggsave(filenome,width=11,height=8) 
-
   
+  addCO <- function(muni){
+    paste("CO",muni,sep = "")
+  }
+  
+  violence_data <- read.csv("Data/Book1.csv")
+  violence_data <- mutate(violence_data, ADM2_PCODE = addCO(municipality))
+  violence_set <- merge(violence_data,FinalWithDeltamins,by="ADM2_PCODE")
 
+  violence_set <- mutate(violence_set,violence = ifelse(victims__UR>0,year,99999))
+  violence_set <- mutate(violence_set, ring_num = as.integer(delta_min/90)+1)
+  temp_violence_set <- violence_set[violence_set$violence!=99999,]
+  Vtot_restricted <- temp_violence_set[violence_set$year == 2012,]
+  Vtot_cumulative <- select(Vtot_restricted,cum_victims_UR,ADM2_PCODE)
+  Vtot_cumulative <- Vtot_cumulative %>% rename(total_victims = cum_victims_UR)
+  Vtot_final <- merge(temp_violence_set,Vtot_cumulative,by = "ADM2_PCODE")
+  outliers <- FinalWithDeltamins[FinalWithDeltamins$delta_min >540,]
+  
+  
+  
+  
