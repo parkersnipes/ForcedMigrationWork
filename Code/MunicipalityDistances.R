@@ -50,6 +50,7 @@ cross_section_geo <-
          delta_3 = purrr::map2_dbl(delta_1,delta_2,min)
 )
 
+
 # Find outliers, which appear to be 23 missing latitude/longitude values (0's). 
 good_munis <- dplyr::filter(cross_section_geo,delta_3<2000)
 

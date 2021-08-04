@@ -18,6 +18,7 @@ library(rvest)
 library(rlist)
 library(readr)
 library(xlsx)
+library(reshape2)
 
 
 cross_section_geo = select(cross_section,municipality,lat_mean,lon_mean,popn1993,ruggedness,slope,V_cum)
@@ -43,6 +44,8 @@ cross_section_geo <- mutate(cross_section_geo,
 
 ll_map <- left_join(muni_pol,AttributeTableFinal,by=c("ADM2_PCODE"))
 
+cross_section_merged <- merge(cross_section_geo,ll_map,by = c("ADM2_PCODE"))
+
 # Create adjacency matrix of shapefile. 
 polygon <- ll_map
 nb <- poly2nb(polygon)
@@ -56,18 +59,23 @@ calcdist <- function(lat1,lon1,lat2,lon2){
   return (distGeo(c(lat1,lon1),c(lat2,lon2))/1000)
 }
 
+roads = read.csv("Data/roads.csv")
+road_code_list <- roads$ADM2_PCODE
+AttributeTableFinal <- mutate(AttributeTableFinal, has_road = (ADM2_PCODE %in% road_code_list))
 weight_matrix <- matrix(,nrow = 1120,ncol = 1120)
 for(i in 1:1120){
   for(j in 1:1120){
     total_dist<-1000000
+    road_factor = 1
+    if(AttributeTableFinal$has_road[i] == 1 && (AttributeTableFinal$has_road[j] == 1)){
+      road_factor = 0.25
+    }
     if(are.connected(munigraph,i,j)){
       d <- calcdist(AttributeTableFinal$latnum[i],AttributeTableFinal$lonnum[i],AttributeTableFinal$latnum[j],AttributeTableFinal$lonnum[j])
       total_dist <- d
-      temp <- d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
-        d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
-      if(!is.na(temp)){
-        total_dist<-temp
-      }
+      temp <- road_factor*d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
+        road_factor*d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
+      #total_dist <= temp
       edge <- get.edge.ids(munigraph,c(i,j))
       munigraph <- set_edge_attr(munigraph,"weight",edge,total_dist) 
     }
@@ -126,8 +134,8 @@ counter = 0
     geom_sf(data = FinalWithDeltamins, aes(fill=delta_min),color = 'grey34',lwd=.05) +
     ggtitle(title) +
     #scale_fill_manual(values=c("white","royalblue1"),aesthetics = c("fill"),name= paste("Between 720-630 km from nearest source ", sep="")) +
-    #binned_scale(aesthetics = c("fill"),scale_name = "bin",palette = scale,breaks = c(0,90,180,270,360,450),labels = c("90km","180km","270km","360km","450km"))
-    scale_fill_stepsn(colors = c("red","gold","darkgreen","blue","magenta","violet"),values = NULL,space = "Lab",na.value = "grey50",guide = "coloursteps",aesthetics = "fill",n.breaks = 7,breaks = c(1,90,180,270,360,450,540),labels = c("0km","90km","180km","270km","360km","450km","540km"),limits=c(0, 1000))
+    #binned_scale(aesthetics = c("fill"),scale_name = "bin",palette = scale,breaks = c(0,10,20,180,240,300),labels = c("km","180km","270km","360km","450km"))
+    scale_fill_stepsn(colors = c("red","gold","darkgreen","blue","magenta","violet"),values = NULL,space = "Lab",na.value = "grey50",guide = "coloursteps",aesthetics = "fill",n.breaks = 7,breaks = c(1,30,60,90,120,150,180),labels = c("0km","90km","180km","270km","360km","450km","540km"),limits=c(0, 1000))
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
@@ -140,19 +148,216 @@ counter = 0
     paste("CO",muni,sep = "")
   }
   
+  
+  
   violence_data <- read.csv("Data/Book1.csv")
   violence_data <- mutate(violence_data, ADM2_PCODE = addCO(municipality))
   violence_set <- merge(violence_data,FinalWithDeltamins,by="ADM2_PCODE")
-
-  violence_set <- mutate(violence_set,violence = ifelse(victims__UR>0,year,99999))
-  violence_set <- mutate(violence_set, ring_num = as.integer(delta_min/90)+1)
-  temp_violence_set <- violence_set[violence_set$violence!=99999,]
-  Vtot_restricted <- temp_violence_set[violence_set$year == 2012,]
-  Vtot_cumulative <- select(Vtot_restricted,cum_victims_UR,ADM2_PCODE)
-  Vtot_cumulative <- Vtot_cumulative %>% rename(total_victims = cum_victims_UR)
-  Vtot_final <- merge(temp_violence_set,Vtot_cumulative,by = "ADM2_PCODE")
-  outliers <- FinalWithDeltamins[FinalWithDeltamins$delta_min >540,]
+ 
+  
+  violence_set <- mutate(violence_set, violence = ifelse(victims__UR>0,year,99999))
+  violence_set <- mutate(violence_set, total_violence = ifelse(year==2012,cum_victims_UR,0))
+  violence_set <- mutate(violence_set, total_violence_num = as.numeric(total_violence))
+  violence_set <- mutate(violence_set, ring_num = as.integer(delta_min/30)+1)
+  
+  vtot_set <- violence_set
+  vtot_set <- select(violence_set,ADM2_PCODE,year,cum_victims_UR,total_violence_num,victims__UR,ring_num)
+  
+  for(i in 1:nrow(vtot_set)){
+      if(vtot_set$year[i] == 2012){
+        code = vtot_set$ADM2_PCODE[i]
+        for(j in 1:nrow(vtot_set)){
+          if(vtot_set$ADM2_PCODE[j] == code){
+            vtot_set$total_violence_num[j] <- vtot_set$cum_victims_UR[i]
+          }
+        }
+      }
+        
+  }
+  
+  # Part 3 here is just graphic year:share for each ring. Do this for all ring sizes.   
+  Vtot_cumulative <- select(vtot_set,year,victims__UR,cum_victims_UR,total_violence_num,ADM2_PCODE)
+  Vtot_final <- merge(FinalWithDeltamins,vtot_set,by = "ADM2_PCODE")
+  Vtot_final <- mutate(Vtot_final, share = victims__UR / total_violence_num)
+  Vtot_final <- filter(Vtot_final,total_violence_num>0)
+  
+  vtot_final_30 <- mutate(Vtot_final, ring_num = as.integer(delta_min/30)+1)
+  vtot_final_60 <- mutate(Vtot_final, ring_num = as.integer(delta_min/60)+1)
+  vtot_final_90 <- mutate(Vtot_final, ring_num = as.integer(delta_min/90)+1)
+  vtot_final_120 <- mutate(Vtot_final, ring_num = as.integer(delta_min/120)+1)
+  
+  vtot_finals <- list(vtot_final_30,vtot_final_60,vtot_final_90,vtot_final_120)
+  yearshare_30 <- matrix(0,nrow = 21,ncol=17)
+  yearshare_60 <- matrix(0,nrow = 21,ncol=17)
+  yearshare_90 <- matrix(0,nrow = 21,ncol=17)
+  yearshare_120 <- matrix(0,nrow = 21,ncol=17)
+  ringshare_30 <- matrix(0,nrow = 21,ncol=4)
+  ringshare_60 <- matrix(0,nrow = 21,ncol=4)
+  ringshare_90<- matrix(0,nrow = 21,ncol=4)
+  ringshare_120 <- matrix(0,nrow = 21,ncol=4)
+  
+  add1995 <- function(idx){
+    return(idx+1995)
+  }
+  
+  for(l in c(1:4)){
+    tmpmatyr_count = matrix(0,nrow = 21,ncol=17)
+    tmpmat_share = matrix(0,nrow = 21,ncol = 17)
+    #print(vtot_final)
+    for(i in 1:nrow(vtot_final)){
+      year = vtot_final$year[i]
+      if(l == 1){
+        ring = vtot_final_30$ring_num[i]
+      }
+      else if(l == 2){
+        ring = vtot_final_60$ring_num[i]
+      }
+      else if(l == 3){
+        ring = vtot_final_90$ring_num[i]
+      }
+      else{
+        ring = vtot_final_120$ring_num[i]
+      }
+      
+      #print(year-1995)
+      tmpmat_share[ring,year-1995] <- tmpmat_share[ring,year-1995]+vtot_final$share[i]
+      tmpmat_count[ring,year-1995] <- tmpmat_count[ring,year-1995]+1
+    }
+    
+    yearshare = tmpmat_share / tmpmat_count
+    yearshare_df = data.frame(data = yearshare)
+    #print(yearshare_df)
+    cnames = c("1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012")
+    colnames(yearshare_df) <- cnames
+    if(l==1){
+      yearshare_30 <- yearshare_df
+    }
+    else if(l==2){
+      yearshare_60 <- yearshare_df
+    }
+    else if(l==3){
+      yearshare_90 <- yearshare_df
+    }
+    else{
+      yearshare_120 <- yearshare_df
+    }
+    
+  }
+  
+  for(rng in 1:21){
+    m_30 <- as.matrix(yearshare_30[rng,])
+    m_60 <- as.matrix(yearshare_60[rng,])
+    m_90 <- as.matrix(yearshare_90[rng,])
+    m_120 <- as.matrix(yearshare_120[rng,])
+    
+    col_30 <- t(m_30)
+    col_60 <- t(m_60)
+    col_90 <- t(m_90)
+    col_120 <- t(m_120)
+    
+    frame_30 <- data.frame(col_30,sapply(c(1:17),add1995))
+    frame_60 <- data.frame(col_60,sapply(c(1:17),add1995))
+    frame_90 <- data.frame(col_90,sapply(c(1:17),add1995))
+    frame_120 <- data.frame(col_120,sapply(c(1:17),add1995))
+    
+    colnames(frame_30) <- c("width = 30","year")
+    colnames(frame_60) <- c("width = 60","year")
+    colnames(frame_90) <- c("width = 90","year")
+    colnames(frame_120) <- c("width = 120","year")
+    
+    plotting <- merge(frame_30,frame_60,by = "year")
+    plotting <- merge(plotting,frame_90,by = "year")
+    plotting <- merge(plotting,frame_120,by = "year")
+    
+    plotting %>% pivot_longer(cols = -year) %>%
+    ggplot(aes(x = year, y = value, col = name)) + geom_line()    
+    #geom_line(y =plotting$share_120.x,color = "violet")
+    filename = paste(paste("figures/violence_timeseries_ring",rng,sep=""),".png",sep="")
+    ggsave(filename,width=11,height=8)
+  }
+  
+  for(yr in 1:17){
+    m_30 <- as.matrix(yearshare_30[,yr])
+    m_60 <- as.matrix(yearshare_60[,yr])
+    m_90 <- as.matrix(yearshare_90[,yr])
+    m_120 <- as.matrix(yearshare_120[,yr])
+    
+    frame_30 <- data.frame(m_30,c(1:21))
+    frame_60 <- data.frame(m_60,c(1:21))
+    frame_90 <- data.frame(m_90,c(1:21))
+    frame_120 <- data.frame(m_120,c(1:21))
+    
+    
+    colnames(frame_30) <- c("width = 30","ring")
+    colnames(frame_60) <- c("width = 60","ring")
+    colnames(frame_90) <- c("width = 90","ring")
+    colnames(frame_120) <- c("width = 120","ring")
+    
+    plotting <- merge(frame_30,frame_60,by = "ring")
+    plotting <- merge(plotting,frame_90,by = "ring")
+    plotting <- merge(plotting,frame_120,by = "ring")
+    
+    plotting %>% pivot_longer(cols = -ring) %>%
+      ggplot(aes(x = ring, y = value, col = name)) + geom_line()    
+    #geom_line(y =plotting$share_120.x,color = "violet")
+    filename = paste(paste("figures/violence_ringseries_",toString(yr+1995),sep=""),".png",sep="")
+    ggsave(filename,width=11,height=8)
+  }
   
   
   
+  for(year in 1996:2012){
+    m_1996 <- as.matrix(yearshare_2012$year)
+    
+    col_30 <- t(m_30)
+    col_60 <- t(m_60)
+    col_90 <- t(m_90)
+    col_120 <- t(m_120)
+    
+    frame_30 <- data.frame(col_30,sapply(c(1:17),add1995))
+    frame_60 <- data.frame(col_60,sapply(c(1:17),add1995))
+    frame_90 <- data.frame(col_90,sapply(c(1:17),add1995))
+    frame_120 <- data.frame(col_120,sapply(c(1:17),add1995))
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  for (y in seq(1996,2012)) {
+    
+    muni_map_yr = muni_map %>%  mutate(first_violence_yr = ifelse(first_violence==y,"Yes","No/NA"))
+    
+    filenome = paste(paste("../figures/share_violence_map_",y,sep=""),".png",sep="")
+    title = paste(paste("Share of violence in violence in ",y,sep="")," by Columbian municipality",sep="")
+    
+    ggplot() +
+      #geom_sf(data = muni_map, fill='white', color = 'grey34',lwd=.05) +
+      geom_sf(data = Vtot_final, aes(fill=first_violence_yr),color = 'grey34',lwd=.05) +
+      ggtitle(title) + 
+      scale_fill_manual(values=c("white","royalblue1"),aesthetics = c("fill"),name= paste("Share by Year of Violence in ", y, sep="")) +
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank())
+    ggsave(filenome,width=11,height=8)
+    
+  }
+  
+ 
   
