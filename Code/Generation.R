@@ -83,6 +83,7 @@ for(i in 1:1120){
   }
 }
 
+
 delta_1 = distances(munigraph,v = 259,to = V(munigraph),algorithm = "dijkstra")
 delta_2 = distances(munigraph,v = 1009,to = V(munigraph),algorithm = "dijkstra")
 
@@ -181,67 +182,60 @@ counter = 0
   Vtot_final <- mutate(Vtot_final, share = victims__UR / total_violence_num)
   Vtot_final <- filter(Vtot_final,total_violence_num>0)
   
-  vtot_final_30 <- mutate(Vtot_final, ring_num = as.integer(delta_min/30)+1)
-  vtot_final_60 <- mutate(Vtot_final, ring_num = as.integer(delta_min/60)+1)
-  vtot_final_90 <- mutate(Vtot_final, ring_num = as.integer(delta_min/90)+1)
-  vtot_final_120 <- mutate(Vtot_final, ring_num = as.integer(delta_min/120)+1)
-  
-  vtot_finals <- list(vtot_final_30,vtot_final_60,vtot_final_90,vtot_final_120)
-  yearshare_30 <- matrix(0,nrow = 21,ncol=17)
-  yearshare_60 <- matrix(0,nrow = 21,ncol=17)
-  yearshare_90 <- matrix(0,nrow = 21,ncol=17)
-  yearshare_120 <- matrix(0,nrow = 21,ncol=17)
-  ringshare_30 <- matrix(0,nrow = 21,ncol=4)
-  ringshare_60 <- matrix(0,nrow = 21,ncol=4)
-  ringshare_90<- matrix(0,nrow = 21,ncol=4)
-  ringshare_120 <- matrix(0,nrow = 21,ncol=4)
-  
-  add1995 <- function(idx){
-    return(idx+1995)
-  }
-  
-  for(l in c(1:4)){
-    tmpmatyr_count = matrix(0,nrow = 21,ncol=17)
-    tmpmat_share = matrix(0,nrow = 21,ncol = 17)
-    #print(vtot_final)
-    for(i in 1:nrow(vtot_final)){
-      year = vtot_final$year[i]
-      if(l == 1){
-        ring = vtot_final_30$ring_num[i]
-      }
-      else if(l == 2){
-        ring = vtot_final_60$ring_num[i]
-      }
-      else if(l == 3){
-        ring = vtot_final_90$ring_num[i]
-      }
-      else{
-        ring = vtot_final_120$ring_num[i]
-      }
-      
-      #print(year-1995)
-      tmpmat_share[ring,year-1995] <- tmpmat_share[ring,year-1995]+vtot_final$share[i]
-      tmpmat_count[ring,year-1995] <- tmpmat_count[ring,year-1995]+1
+  for(width_count in 1:4){
+    Vtot_final <- mutate(Vtot_final, ring_num = as.integer(delta_min/(30*width_count)+1))
+    ring_count <- matrix(0,nrow = 1,ncol = 21)
+    share_matrix = matrix(0,nrow = 17,ncol = 21)
+    for(i in 1:nrow(Vtot_final)){
+      year = Vtot_final$year[i]
+      ring = Vtot_final$ring_num[i]
+      ring_count[1,ring] <- ring_count[1,ring]+1
+      share_matrix[year-1995,ring] <- share_matrix[year-1995,ring]+Vtot_final$share[i]
     }
     
-    yearshare = tmpmat_share / tmpmat_count
-    yearshare_df = data.frame(data = yearshare)
-    #print(yearshare_df)
+    ring_count <- ring_count/17
+    ring_count_matrix <- matrix(rep(t(ring_count),17),ncol=ncol(ring_count),byrow=TRUE)
+    
+    
+    yearshare <- t(share_matrix / ring_count_matrix)
+    yearshare_df <- data.frame(data = yearshare)
     cnames = c("1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012")
     colnames(yearshare_df) <- cnames
-    if(l==1){
-      yearshare_30 <- yearshare_df
-    }
-    else if(l==2){
-      yearshare_60 <- yearshare_df
-    }
-    else if(l==3){
-      yearshare_90 <- yearshare_df
-    }
-    else{
-      yearshare_120 <- yearshare_df
-    }
+    yearshare_df <- cbind("ring" = as.numeric(rownames(yearshare_df)),yearshare_df)
+    yearshare_df <- pivot_longer(yearshare_df,cnames,names_to = "year",values_to = "share")    
     
+    yearshare_df_1 <- filter(yearshare_df,ring<7)
+    yearshare_df_2 <- filter(yearshare_df,ring>=7 & ring<14)
+    yearshare_df_3 <- filter(yearshare_df,ring>=14 & ring<21)
+    
+    ggplot(yearshare_df_1,aes(x = year,y = share,group = factor(ring)))+geom_line(aes(colour = factor(ring)))+ scale_x_discrete(limits=c("1996","1998","2000","2002","2004","2006","2008","2010","2012"))
+    filename = paste(paste("figures/violence_ringseries_1-6 width = ",width_count,sep = ""),".png",sep = "")
+    ggsave(filename,width=11,height=8)
+    ggplot(yearshare_df_2,aes(x = year,y = share,group = factor(ring)))+geom_line(aes(colour = factor(ring)))+ scale_x_discrete(limits=c("1996","1998","2000","2002","2004","2006","2008","2010","2012"))
+    filename = paste(paste("figures/violence_ringseries_7-13-width = ",width_count,sep = ""),".png",sep = "")
+    ggsave(filename,width=11,height=8)
+    ggplot(yearshare_df_3,aes(x = year,y = share,group = factor(ring)))+geom_line(aes(colour = factor(ring)))+ scale_x_discrete(limits=c("1996","1998","2000","2002","2004","2006","2008","2010","2012"))
+    filename = paste(paste("figures/violence_ringseries_14-20, width = ",width_count,sep = ""),".png",sep = "")
+    ggsave(filename,width=11,height=8)
+    ggplot(yearshare_df_1,aes(x = year,y = share,group = factor(ring)))+geom_line(aes(colour = factor(ring)))+ scale_x_discrete(limits=c("1996","1998","2000","2002","2004","2006","2008","2010","2012"))
+    filename = paste(paste("figures/violence_ringseries_1-6 width = ",width_count,sep = ""),".png",sep = "")
+    ggsave(filename,width=11,height=8)
+    
+    yearshare_df_1 <- filter(yearshare_df,year<2002)
+    yearshare_df_2 <- filter(yearshare_df,year>=2002 & year<2008)
+    yearshare_df_3 <- filter(yearshare_df,year>=2008)
+    
+    ggplot(yearshare_df_1,aes(x = ring,y = share,group = factor(year)))+geom_line(aes(colour = factor(year)))+ scale_x_discrete(limits=c("2","4","6","8","10","12","14","16","18","20"))
+    filename = paste(paste("figures/violence_yearseries_1996-2001, width = ",width_count,sep = ""),".png",sep = "")
+    ggsave(filename,width=11,height=8)
+    ggplot(yearshare_df_2,aes(x = ring,y = share,group = factor(year)))+geom_line(aes(colour = factor(year)))+ scale_x_discrete(limits=c("2","4","6","8","10","12","14","16","18","20"))
+    filename = paste(paste("figures/violence_yearseries_2001-2007, width = ",width_count,sep = ""),".png",sep = "")
+    ggsave(filename,width=11,height=8)
+    ggplot(yearshare_df_3,aes(x = ring,y = share,group = factor(year)))+geom_line(aes(colour = factor(year)))+ scale_x_discrete(limits=c("2","4","6","8","10","12","14","16","18","20"))
+    filename = paste(paste("figures/violence_yearseries_2008-2012, width = ",width_count,sep = ""),".png",sep = "")
+    ggsave(filename,width=11,height=8)
+      
+      
   }
   
   for(rng in 1:21){
@@ -276,35 +270,9 @@ counter = 0
     ggsave(filename,width=11,height=8)
   }
   
-  for(yr in 1:17){
-    m_30 <- as.matrix(yearshare_30[,yr])
-    m_60 <- as.matrix(yearshare_60[,yr])
-    m_90 <- as.matrix(yearshare_90[,yr])
-    m_120 <- as.matrix(yearshare_120[,yr])
+  for(l in 1:4){
     
-    frame_30 <- data.frame(m_30,c(1:21))
-    frame_60 <- data.frame(m_60,c(1:21))
-    frame_90 <- data.frame(m_90,c(1:21))
-    frame_120 <- data.frame(m_120,c(1:21))
-    
-    
-    colnames(frame_30) <- c("width = 30","ring")
-    colnames(frame_60) <- c("width = 60","ring")
-    colnames(frame_90) <- c("width = 90","ring")
-    colnames(frame_120) <- c("width = 120","ring")
-    
-    plotting <- merge(frame_30,frame_60,by = "ring")
-    plotting <- merge(plotting,frame_90,by = "ring")
-    plotting <- merge(plotting,frame_120,by = "ring")
-    
-    plotting %>% pivot_longer(cols = -ring) %>%
-      ggplot(aes(x = ring, y = value, col = name)) + geom_line()    
-    #geom_line(y =plotting$share_120.x,color = "violet")
-    filename = paste(paste("figures/violence_ringseries_",toString(yr+1995),sep=""),".png",sep="")
-    ggsave(filename,width=11,height=8)
   }
-  
-  
   
   for(year in 1996:2012){
     m_1996 <- as.matrix(yearshare_2012$year)
@@ -319,17 +287,6 @@ counter = 0
     frame_90 <- data.frame(col_90,sapply(c(1:17),add1995))
     frame_120 <- data.frame(col_120,sapply(c(1:17),add1995))
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   
   
