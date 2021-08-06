@@ -33,7 +33,6 @@ addCO <- function(muni){
   paste("CO",muni,sep = "")
 }
 
-
 AttributeTableFinal <- read.csv("Data/AttributeTableFinal.csv")
 
 AttributeTableFinal <- mutate(AttributeTableFinal,latnum = as.numeric(lat),
@@ -76,7 +75,7 @@ for(i in 1:1120){
       total_dist <- d
       temp <- road_factor*d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
         road_factor*d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
-      total_dist <= temp
+      #total_dist <= temp
       edge <- get.edge.ids(munigraph,c(i,j))
       munigraph <- set_edge_attr(munigraph,"weight",edge,total_dist) 
     }
