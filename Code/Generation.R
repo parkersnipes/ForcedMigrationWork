@@ -190,9 +190,9 @@ counter = 0
   
   for(width_count in 1:4){
     Vtot_final <- mutate(Vtot_final, ring_num = as.integer(delta_min/(30*width_count)+1))
-    ring_count <- matrix(0,nrow = 1,ncol = 21)
     yearshare_matrix <- matrix(0,nrow = 17,ncol = 21)
     stderr_matrix <- matrix(0,nrow = 17,ncol = 21)
+    ring_count_list <- matrix(0,nrow= 1,ncol = 21)
     for(year_index in 1996:2012){
       for(ring_index in 1:21){
         temp_Vtot_Final <- filter(Vtot_final,year == year_index & ring_num == ring_index)
@@ -200,9 +200,11 @@ counter = 0
         yearshare_list <- temp_Vtot_Final$share
         stderr_matrix[year_index-1995,ring_index] <- std.error(yearshare_list)
         yearshare_matrix[year_index-1995,ring_index] <- sum(yearshare_list)/ring_count
+        ring_count_list[ring_index] <- ring_count
       }
+      
     }
-    
+    print(sum(ring_count_list))
     pd = position_dodge2(width = NULL,
                          preserve = c("total", "single"),
                          padding = 0.1,
