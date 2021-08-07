@@ -68,14 +68,14 @@ for(i in 1:1120){
     total_dist<-1000000
     road_factor = 1
     if(AttributeTableFinal$has_road[i] == 1 && (AttributeTableFinal$has_road[j] == 1)){
-      road_factor = 0.25
+      #road_factor = 0.25
     }
     if(are.connected(munigraph,i,j)){
       d <- calcdist(AttributeTableFinal$latnum[i],AttributeTableFinal$lonnum[i],AttributeTableFinal$latnum[j],AttributeTableFinal$lonnum[j])
       total_dist <- d
       temp <- road_factor*d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
         road_factor*d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
-      total_dist <= temp
+      #total_dist <= temp
       edge <- get.edge.ids(munigraph,c(i,j))
       munigraph <- set_edge_attr(munigraph,"weight",edge,total_dist) 
     }
@@ -94,7 +94,7 @@ colnames(deltas) <- c("delta_1","delta_2")
 deltas <- mutate(deltas, 
        delta_min = purrr::map2(delta_1,delta_2,min))
 
-var = as.numeric(deltas$delta_min)
+var = as.numeric(deltas$delta_1)
 summary(var)
 sd(var)
 
