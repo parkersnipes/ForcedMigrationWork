@@ -68,14 +68,14 @@ for(i in 1:1120){
     total_dist<-1000000
     road_factor = 1
     if(AttributeTableFinal$has_road[i] == 1 && (AttributeTableFinal$has_road[j] == 1)){
-      #road_factor = 0.25
+      road_factor = 0.25
     }
     if(are.connected(munigraph,i,j)){
       d <- calcdist(AttributeTableFinal$latnum[i],AttributeTableFinal$lonnum[i],AttributeTableFinal$latnum[j],AttributeTableFinal$lonnum[j])
       total_dist <- d
       temp <- road_factor*d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
         road_factor*d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
-      #total_dist <= temp
+      total_dist <= temp
       edge <- get.edge.ids(munigraph,c(i,j))
       munigraph <- set_edge_attr(munigraph,"weight",edge,total_dist) 
     }
@@ -193,12 +193,14 @@ counter = 0
     stderr_matrix <- matrix(0,nrow = 17,ncol = 21)
     ring_count_list <- matrix(0,nrow= 1,ncol = 21)
     for(year_index in 1996:2012){
+      yr_Vtot_Final <- filter(Vtot_final,year == year_index)
+      total_average <- sum(yr_Vtot_Final$share)/466
       for(ring_index in 1:21){
-        temp_Vtot_Final <- filter(Vtot_final,year == year_index & ring_num == ring_index)
+        temp_Vtot_Final <- filter(Vtot_final,year == year_index &ring_num == ring_index)
         ring_count <- nrow(temp_Vtot_Final)
         yearshare_list <- temp_Vtot_Final$share
         stderr_matrix[year_index-1995,ring_index] <- std.error(yearshare_list)
-        yearshare_matrix[year_index-1995,ring_index] <- sum(yearshare_list)/ring_count
+        yearshare_matrix[year_index-1995,ring_index] <- sum(yearshare_list)/ring_count-total_average
         ring_count_list[ring_index] <- ring_count
       }
       
