@@ -63,6 +63,7 @@ roads = read.csv("Data/real_roads.csv")
 road_code_list <- roads$ADM2_PCODE
 AttributeTableFinal <- mutate(AttributeTableFinal, has_road = (ADM2_PCODE %in% road_code_list))
 weight_matrix <- matrix(,nrow = 1120,ncol = 1120)
+
 for(i in 1:1120){
   for(j in 1:1120){
     total_dist<-1000000
@@ -73,15 +74,15 @@ for(i in 1:1120){
     if(are.connected(munigraph,i,j)){
       d <- calcdist(AttributeTableFinal$latnum[i],AttributeTableFinal$lonnum[i],AttributeTableFinal$latnum[j],AttributeTableFinal$lonnum[j])
       total_dist <- d
-      temp <- road_factor*d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
-        road_factor*d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
-      total_dist <= temp
+      if(i<nrow(cross_section_merged) & j<nrow(cross_section_merged)){
+        temp <- road_factor*d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
+          road_factor*d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
+        #total_dist <- temp
+      }
       edge <- get.edge.ids(munigraph,c(i,j))
       munigraph <- set_edge_attr(munigraph,"weight",edge,total_dist) 
     }
     weight_matrix[i,j]<-total_dist
-    
-    
   }
 }
 
