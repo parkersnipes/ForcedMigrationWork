@@ -59,7 +59,7 @@ calcdist <- function(lat1,lon1,lat2,lon2){
   return (distGeo(c(lat1,lon1),c(lat2,lon2))/1000)
 }
 
-roads = read.csv("Data/roads.csv")
+roads = read.csv("Data/real_roads.csv")
 road_code_list <- roads$ADM2_PCODE
 AttributeTableFinal <- mutate(AttributeTableFinal, has_road = (ADM2_PCODE %in% road_code_list))
 weight_matrix <- matrix(,nrow = 1120,ncol = 1120)
@@ -89,23 +89,58 @@ for(i in 1:1120){
 delta_1 = distances(munigraph,v = 259,to = V(munigraph),algorithm = "dijkstra")
 delta_2 = distances(munigraph,v = 1009,to = V(munigraph),algorithm = "dijkstra")
 
+
 deltas <- data.frame(matrix(c(delta_1,delta_2),ncol = 2))
 colnames(deltas) <- c("delta_1","delta_2")
 deltas <- mutate(deltas, 
        delta_min = purrr::map2(delta_1,delta_2,min))
 
-var = as.numeric(deltas$delta_1)
+# Pathing. 
+
+path_count <- matrix(0,nrow = 1,ncol = 1120)
+
+for(i in 1:nrow(deltas)){
+  pathing1 = shortest_paths(munigraph,259,to = i,output = "vpath")
+  pathing2 = shortest_paths(munigraph,1009,to = i,output = "vpath")
+  
+  path1 <- matrix(unlist(pathing1), nrow = 1)
+  path2 <- matrix(unlist(pathing2),nrow = 1)
+  
+  
+  # Optional: Do both. 
+  d_1 = distances(munigraph,v = 259,to = i,algorithm = "dijkstra")
+  d_2 = distances(munigraph,v = 1009,to = i,algorithm = "dijkstra")
+  
+  if(deltas$delta_min[i] == d_1){
+    for(node in path1[1,]){
+      path_count[node] <- path_count[node]+1
+    } 
+  }
+  
+  else{
+    for(node in path2[1,]){
+      path_count[node] <- path_count[node]+1
+    }
+  }
+  
+}
+
+var1 = as.numeric(deltas$delta_min)
+var2 = as.numeric(path_count)
 summary(var)
 sd(var)
 
+
 delta_min_vector = vector(length = 1120)
+path_count_vector = vector(length = 1120)
 vertex_ids = vector(length = 1120)
 for(i in 1:1120){
   vertex_ids[i]<- AttributeTableFinal$ADM2_PCODE[i]
-  delta_min_vector[i] <- var[i]
+  delta_min_vector[i] <- var1[i]
+  path_count_vector[i] <- var2[i]
 }
 
-merge_deltamins <- data.frame(delta_min = delta_min_vector,ADM2_PCODE = vertex_ids) 
+merge_deltamins <- data.frame(delta_min = delta_min_vector,path_count = path_count_vector,ADM2_PCODE = vertex_ids) 
 FinalWithDeltamins <- merge(ll_map,merge_deltamins,by = "ADM2_PCODE")
 
 #FinalWithDeltamins$delta_min[FinalWithDeltamins$delta_min > 1000] <- NA
@@ -114,13 +149,13 @@ filenome = paste(paste("Histogram of updated delta-min",sep=""),".png",sep="")
 qplot(as.numeric(deltas$delta_min), geom = "histogram",binwidth = 10,fill = I("darkblue"),main="Cumulative, Terrain-weighted Distance from Violence Source",xlab="Distance from Source (km)")
 ggsave(filenome,width=11,height=8)
 
-filenome = paste(paste("figures/Updated_distance_map_gradient",sep=""),".png",sep="")
-title = paste(paste("Updated Colombian municipalities by distance from closest violence source ",sep=""),sep="")
+filenome = paste(paste("figures/Updated_count_map_gradient",sep=""),".png",sep="")
+title = paste(paste("Updated Colombian municipalities by path count from closest violence source ",sep=""),sep="")
 ggplot() +
   #geom_sf(data = muni_map, fill='white', color = 'grey34',lwd=.05) +
-  geom_sf(data = FinalWithDeltamins, aes(fill=delta_min),color = 'grey34',lwd=.05) +
+  geom_sf(data = FinalWithDeltamins, aes(fill=log(path_count)),color = 'grey34',lwd=.05) +
   ggtitle(title) +
-  scale_fill_gradient(low = "red", high = "blue",aesthetics = c("fill"),name= paste("Distance from source (km)", sep="")) +
+  scale_fill_gradient(low = "blue", high = "red",aesthetics = c("fill"),name= paste("Log Number of times appearing in closest path", sep="")) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
@@ -291,7 +326,7 @@ counter = 0
     #geom_line(y =plotting$share_120.x,color = "violet")
     filename = paste(paste("figures/violence_timeseries_ring",rng,sep=""),".png",sep="")
     ggsave(filename,width=11,height=8)
-  }
+  } 
   
   for(year in 1996:2012){
     m_1996 <- as.matrix(yearshare_2012$year)
@@ -306,6 +341,8 @@ counter = 0
     frame_90 <- data.frame(col_90,sapply(c(1:17),add1995))
     frame_120 <- data.frame(col_120,sapply(c(1:17),add1995))
   }
+  
+  
   
   for (y in seq(1996,2012)) {
     
