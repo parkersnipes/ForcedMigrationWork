@@ -20,6 +20,8 @@ library(readr)
 library(xlsx)
 library(reshape2)
 library(plotrix)
+library(shiny)
+library(shinythemes)
 
 
 cross_section_geo = select(cross_section,municipality,lat_mean,lon_mean,popn1993,ruggedness,slope,V_cum)
