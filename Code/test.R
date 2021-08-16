@@ -24,11 +24,6 @@ library(shiny)
 library(shinythemes)
 
 cross_section_geo = select(cross_section,municipality,lat_mean,lon_mean,popn1993,ruggedness,slope,V_cum)
-muni_pol <- st_read("Data/col muni polygons/col_admbnda_adm2_mgn_20200416.shp",
-                    stringsAsFactors=FALSE)
-
-muni_pol <- subset(muni_pol,ADM2_PCODE != "CO88001")
-muni_pol <- subset(muni_pol,ADM2_PCODE!="CO88564")
 
 addCO <- function(muni){
   paste("CO",muni,sep = "")
@@ -43,18 +38,11 @@ AttributeTableFinal <- mutate(AttributeTableFinal,latnum = as.numeric(lat),
 cross_section_geo <- mutate(cross_section_geo,
                             ADM2_PCODE = purrr::map_chr(municipality,addCO))
 
-ll_map <- left_join(muni_pol,AttributeTableFinal,by=c("ADM2_PCODE"))
-
-cross_section_merged <- merge(cross_section_geo,ll_map,by = c("ADM2_PCODE"))
+cross_section_merged <- merge(cross_section_geo,AttributeTableFinal,by = c("ADM2_PCODE"))
 
 # Create adjacency matrix of shapefile. 
-polygon <- ll_map
-nb <- poly2nb(polygon)
-(nb)
-listw <- nb2listw(nb,zero.policy = TRUE)
-mat2 <- listw2mat(listw)
 
-munigraph <- graph_from_adjacency_matrix(mat2,mode ="undirected",weighted = TRUE)
+munigraph <- read_graph("munigraph.txt",format = "edgelist")
 
 calcdist <- function(lat1,lon1,lat2,lon2){
   return (distGeo(c(lat1,lon1),c(lat2,lon2))/1000)
@@ -81,12 +69,12 @@ calculateDF <- function(width,k,distanceMetric,granularity){
         if(i<nrow(cross_section_merged) & j<nrow(cross_section_merged)){
           temp <- road_factor*d/2 * (1+cross_section_merged$ruggedness[i])^(1+cross_section_merged$slope[i]/90)+
             road_factor*d/2 * (1+cross_section_merged$ruggedness[j])^(1+cross_section_merged$slope[j]/90)
-        if(distanceMetric>1){
-          total_dist <- temp
+          if(distanceMetric>1){
+            total_dist <- temp
+          }
         }
-      }
-      edge <- get.edge.ids(munigraph,c(i,j))
-      munigraph <- set_edge_attr(munigraph,"weight",edge,total_dist) 
+        edge <- get.edge.ids(munigraph,c(i,j))
+        munigraph <- set_edge_attr(munigraph,"weight",edge,total_dist) 
       }
       weight_matrix[i,j]<-total_dist
     }
@@ -102,34 +90,7 @@ calculateDF <- function(width,k,distanceMetric,granularity){
   deltas <- mutate(deltas, 
                    delta_min = purrr::map2(delta_1,delta_2,min))
   
-  # Pathing. 
-  path_count <- matrix(0,nrow = 1,ncol = 1120)
   
-  for(i in 1:nrow(deltas)){
-    pathing1 = shortest_paths(munigraph,259,to = i,output = "vpath")
-    pathing2 = shortest_paths(munigraph,1009,to = i,output = "vpath")
-    
-    path1 <- matrix(unlist(pathing1), nrow = 1)
-    path2 <- matrix(unlist(pathing2),nrow = 1)
-    
-    
-    # Optional: Do both. 
-    d_1 = distances(munigraph,v = 259,to = i,algorithm = "dijkstra")
-    d_2 = distances(munigraph,v = 1009,to = i,algorithm = "dijkstra")
-    
-    if(deltas$delta_min[i] == d_1){
-      for(node in path1[1,]){
-        path_count[node] <- path_count[node]+1
-      } 
-    }
-    
-    else{
-      for(node in path2[1,]){
-        path_count[node] <- path_count[node]+1
-      }
-    }
-    
-  }
   var1 = as.numeric(deltas$delta_min)
   var2 = as.numeric(path_count)
   
@@ -143,7 +104,7 @@ calculateDF <- function(width,k,distanceMetric,granularity){
   }
   
   merge_deltamins <- data.frame(delta_min = delta_min_vector,path_count = path_count_vector,ADM2_PCODE = vertex_ids) 
-  FinalWithDeltamins <- merge(ll_map,merge_deltamins,by = "ADM2_PCODE")
+  FinalWithDeltamins <- merge(cross_section_merged,merge_deltamins,by = "ADM2_PCODE")
   
   violence_data <- read.csv("Data/Book1.csv")
   violence_data <- mutate(violence_data, ADM2_PCODE = addCO(municipality))
@@ -177,18 +138,21 @@ calculateDF <- function(width,k,distanceMetric,granularity){
   Vtot_final <- filter(Vtot_final,total_violence_num>0)
   
   Vtot_final <- mutate(Vtot_final, ring_num = as.integer(delta_min/(as.numeric(width))+1))
-  yearshare_matrix <- matrix(0,nrow = length(seq(1996,2012,granularity)),ncol = 21)
-  stderr_matrix <- matrix(0,nrow= length(seq(1996,2012,granularity)),ncol = 21)
+  start_years <- seq(1996,2011,granularity)
+  yearshare_matrix <- matrix(0,nrow= length(start_years),ncol = 21)
+  stderr_matrix <- matrix(0,nrow= length(start_years),ncol = 21)
   ring_count_list <- matrix(0,nrow= 1,ncol = 21)
-  for(year_index in seq(1996,2012,granularity)){
-    endpt = min(2012,year_index+granularity-1)
-    year_range = year_index:endpt
+  
+  for(index in 1:length(start_years)){
+    year_index <- start_years[index]
     for(ring_index in 1:21){
-      temp_Vtot_Final <- filter(Vtot_final,year %in% year_range & ring_num == ring_index)
+      endpt <- min(2012,year_index+granularity-1)
+      year_range <- year_index:endpt
+      temp_Vtot_Final <- filter(Vtot_final,year %in% year_range &ring_num == ring_index)
       ring_count <- nrow(temp_Vtot_Final)/length(year_range)
       yearshare_list <- temp_Vtot_Final$share
-      stderr_matrix[which(year_range == year_index),ring_index] <- std.error(yearshare_list)
-      yearshare_matrix[which(year_range == year_index),ring_index] <- sum(yearshare_list)/ring_count
+      stderr_matrix[index,ring_index] <- std.error(yearshare_list)
+      yearshare_matrix[index,ring_index] <- sum(yearshare_list)/ring_count
       ring_count_list[ring_index] <- ring_count
     }
     
@@ -200,7 +164,7 @@ calculateDF <- function(width,k,distanceMetric,granularity){
   
   yearshare_df <- data.frame(data = t(yearshare_matrix))
   stderr_df <- data.frame(data = t(stderr_matrix))
-  cnames = paste(seq(1996,2012,granularity))
+  cnames = paste(start_years)
   colnames(yearshare_df) <- cnames
   colnames(stderr_df) <- cnames
   yearshare_df <- cbind("ring" = as.numeric(rownames(yearshare_df)),yearshare_df)
@@ -208,7 +172,6 @@ calculateDF <- function(width,k,distanceMetric,granularity){
   stderr_df <- cbind("ring" = as.numeric(rownames(stderr_df)),stderr_df)
   stderr_df <- pivot_longer(stderr_df,cnames,names_to = "year",values_to = "se")
   yearshare_df <- merge(yearshare_df,stderr_df,by = c("ring","year"))
-  
   
   yearshare_df_1 <- filter(yearshare_df,ring<7)
   yearshare_df_2 <- filter(yearshare_df,ring>=7 & ring<14)
@@ -235,15 +198,15 @@ server <- function(input, output) {
       need(input$k, 'Please choose a state.')
     )
     
-    yearshare_df_1 <- matrix(,nrow = 21,ncol = 17)
+    
     granularity <- reactive(input$granularity)
     width<- reactive(input$width)
     k <- reactive(input$k)
     distanceMetric <- reactive(input$distanceMetric)
     yearshare_df_1 <- calculateDF(width(),k(),distanceMetric(),granularity())
     
-    
-    ggplot(yearshare_df_1,aes(x = year,y = share,group = factor(ring)))+geom_point(aes(colour = factor(ring)))+ scale_x_discrete(limits=c("1996","1998","2000","2002","2004","2006","2008","2010","2012"))+geom_errorbar( aes(ymin = share-se, ymax = share+se,colour = factor(ring)),width = 0.2)+facet_wrap(~ ring)
+    print(yearshare_df_1)
+    ggplot(yearshare_df_1,aes(x = year,y = share,group = factor(ring)))+geom_point(aes(colour = factor(ring)))+ scale_x_discrete(limits=paste(cnames))+geom_errorbar( aes(ymin = share-se, ymax = share+se,colour = factor(ring)),width = 0.2)+facet_wrap(~ ring)
     #ggplot(yearshare_heatmap,aes(x = year,y = ring,fill = share)) + geom_bin2d(binwidth = c(20,20))+scale_fill_gradient(low = "royalblue",high = "red")
     #plot(yearshare_df_1$year,yearshare_df_1$share, main = paste(c(input$k, input$width), collapse = ', '))
   })

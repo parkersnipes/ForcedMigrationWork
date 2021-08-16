@@ -1,0 +1,13 @@
+name: GraphBuilder
+title: GraphBuilder
+username:
+account: parkersnipes
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4498909
+bundleId: 4929540
+url: https://parkersnipes.shinyapps.io/GraphBuilder/
+when: 1629135914.56316
+lastSyncTime: 1629135914.56319
+asMultiple: FALSE
+asStatic: FALSE
