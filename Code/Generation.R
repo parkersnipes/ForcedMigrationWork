@@ -57,6 +57,8 @@ mat2 <- listw2mat(listw)
 
 munigraph <- graph_from_adjacency_matrix(mat2,mode ="undirected",weighted = TRUE)
 
+write_graph(munigraph, "munigraph.txt", format = "edgelist")
+
 calcdist <- function(lat1,lon1,lat2,lon2){
   return (distGeo(c(lat1,lon1),c(lat2,lon2))/1000)
 }
@@ -241,6 +243,8 @@ counter = 0
         yearshare_matrix[year_index-1995,ring_index] <- sum(yearshare_list)/ring_count-total_average
         ring_count_list[ring_index] <- ring_count
       }
+    
+    print(yearshare_df)
       
     }
     print(sum(ring_count_list))
