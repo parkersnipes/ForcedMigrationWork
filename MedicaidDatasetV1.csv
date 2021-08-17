@@ -1,0 +1,54 @@
+﻿State:,Policy,Ages,Stimulant,Non-Stimulant,Specify_Medications,Specify_Criteria,Diagnosis,Psych_Eval,Consideration_Medical,Consideration_Non_Medical,Prescriber_Consultation,Impairment,Failure_Medical,Failure_Non-Medical,Rejection_Other_Causes,Ages_Denied,Date_Expanded,Date_Enaction
+Alabama,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2003
+Alaska,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,9/11/15,NA
+Arizona,Yes,Below 6,Yes,No,No,Yes,Yes,No,Yes,No,No,No,No,No,No,No,1/1/14,2006
+Arkansas,Yes,"Below 18, FDA",Yes,Yes,Yes,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,No,1/1/14,2004
+California,Yes,"Below 3, 17",Yes,No,No,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,No,1/1/14,2002
+Colorado,Yes,"Below 6, FDA",Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,Yes,No,No,No,1/1/14,2004
+Connecticut,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Delaware,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+District of Columbia,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Florida,Yes,Below 6,Yes,Yes,Yes,Yes,Yes,No,Yes,Yes,Yes,Yes,Yes,Yes,No,No,NA,2001
+Georgia,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Hawaii,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Idaho,Yes,"Below 18, FDA",Yes,Yes,Yes,Yes,Yes,No,Yes,No,No,No,Yes,No,No,No,1/1/20,2004
+Illinois,Yes,Below 6,Yes,No,Yes,Yes,Yes,No,Yes,Yes,Yes,No,No,No,No,No,1/1/14,2002
+Indiana,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2/1/15,NA
+Iowa,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Kansas,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Kentucky,No ,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Louisiana,Yes,Below 4,NA,NA,No,Yes,Yes,Yes,Yes,Yes,No,No,No,No,Yes,No,7/1/16,2004
+Maine,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,No,Yes,No,No,No,Yes,No,No,No,1/10/19,2001
+Maryland,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Massachusetts,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,No,Yes,Yes,No,No,No,No,No,No,1/1/14,2002
+Michigan,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,4/1/14,NA
+Minnesota,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,No,No,Below 3,1/1/14,2002
+Mississippi,Yes,Below 6,Yes,Yes,Yes,Yes,Yes,No,Yes,No,No,No,No,No,No,No,NA,2004
+Missouri,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,NA,2002
+Montana,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/16,NA
+Nebraska,Yes,Below 5,Yes,No,Yes,Yes,Yes,No,Yes,No,No,No,No,No,No,No,10/1/20,2008
+Nevada,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,Yes,No,No,No,Yes,Yes,No,No,No,1/1/14,2003
+New Hampshire,Yes,"Below 5, 17",Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,Yes,No,No,No,8/15/14,2003
+New Jersey,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+New Mexico,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+New York,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,1/1/14,2005
+North Dakota,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Ohio,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Oklahoma,Yes,Below 5,Yes,Yes,Yes,Yes,Yes,No,Yes,No,No,No,No,No,No,NA,1/1/14,2002
+Oregon,Yes,Below 6,Yes,Yes,Yes,Yes,Yes,No,Yes,No,Yes,No,No,No,No,No,NA,2003
+Pennsylvania,Yes,Below 5,Yes,Yes,Yes,Yes,Yes,Yes,Yes,No,Yes,No,No,No,No,No,1/1/14,(NA)
+Rhode Island,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/15,NA
+South Carolina,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+South Dakota,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Tennessee,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+Texas,Yes,"Below 6, sub",Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,No,No,No,Below 3,NA,2003
+Utah,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,NA,2009
+Vermont,Yes,"Below 3, 13-17",Yes,Yes,Yes,Yes,No,No,No,No,No,No,No,No,No,No,1/1/20,2001
+Virginia,Yes,"Below 6, FDA",Yes,Yes,Yes,Yes,Yes,No,Yes,Yes,Yes,Yes,No,No,No,No,1/1/14,2003
+Washington,Yes,Below 5,NA,NA,No,Yes,No,No,No,No,Yes,No,No,No,No,No,1/1/19,2003
+West Virginia,Yes,Below 18,Yes,Yes,Yes,Yes,Yes,No,Yes,No,No,No,No,No,No,No,1/1/14,2002
+Wisconsin,No,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1/1/14,NA
+Wyoming,Yes,Below 4,Yes,Yes,Yes,Yes,Yes,No,Yes,No,No,No,Yes,No,No,No,NA,2003
+,,,,,,,,,,,,,,,,,,
+"Texas, Louisiana, Minnesota. ",,,,,,,,,,,,,,,,,,
+Upcoming: Handcode FDA (varies by medication),,,,,,,,,,,,,,,,,,
